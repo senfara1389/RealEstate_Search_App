@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask App</title>
+</head>
+<body>
+    <div id="option">
+        <h3>Izaberite opciju: </h3>
+            <input type="radio" id="search_database" name="option" onclick="renderSearchInputs()" checked>
+            <label for="search_database">Pretraži bazu</label>
+            <input type="radio" id="add_estate" name="option" onclick="renderCreateInputs()">
+            <label for="add_estate">Dodaj nekretninu</label>
+            <br>
+    </div>
+    <div id="action">
+        <h1>Pretraživač nekretnina</h1>
+        <div class="filters">
+            <h2>Filteri: </h2>
+            <form action="{{url_for('read', page_num=1)}}" method="POST">
+                <h3>Tip nekretnine: </h3>
+                <input type="radio" id="radio_house" name="house" value="kuca" checked>
+                <label for="radio_house">Kuća</label>
+                <input type="radio" id="radio_flat" name="house" value="stan">
+                <label for="radio_flat">Stan</label>
+                <br>
+
+                <h3>Dostupnost parkinga: </h3>
+                <input type="radio" id="radio_parking_yes" name="parking" value=True checked>
+                <label for="radio_parking_yes">Da</label>
+                <input type="radio" id="radio_parking_no" name="parking" value=False>
+                <label for="radio_parking_no">Ne</label>
+                <br>
+
+                <h3>Kvadratura: </h3>
+                <label for="min_squares">Od: </label>
+                <input type="number" id="min_squares" name="min_squares" value="0">
+                <label for="max_squares">Do: </label>
+                <input type="number" id="max_squares" name="max_squares" value="100000">
+                <br>
+
+                <h3>Identifikator: </h3>
+                <label for="id_show">ID: </label>
+                <input type="number" id="id_show" name="id_show">
+                <br>
+                <br>
+                <button type="submit" id="submit_btn" name="submit_btn">Pretraži</button>
+            </form>
+        </div>
+    </div>
+    <div id="results">
+        {% if data is not none %}
+            {% if data is string %}
+                <div class="message">
+                    {{ data }}
+                </div>
+            {% else %}
+                {% for row in data.items %}
+                        <div class='row'>
+                            <ul>
+                                <li>ID: {{ row.advert_id }}</li>
+                                <li>Tip nekretnine: {{ row.residence_type }}</li>
+                                <li>Tip ponude: {{ row.transaction_type }}</li>
+                                <li>Lokacija: {{ row.location }}</li>
+                                <li>Kvadratura: {{ row.size }}</li>
+                                <li>Broj soba: {{ row.room_count }}</li>
+                                <li>Parking: {{ row.parking }}</li>
+                                <li>Tip grejanja: {{ row.heating_type }}</li>
+                                <li>Broj kupatila: {{ row.bathroom_count }}</li>
+                                <li>Veličina zemljišta: {{ row.land }}</li>
+                                <li>Spratnost: {{ row.level }}</li>
+                                <li>Uknjiženost: {{ row.registered }}</li>
+                                <li>Godina gradnje: {{ row.building_year }}</li>
+                                <li>Dodatne informacije: <pre>{{ row.additional_info }}</pre> </li>
+                            </ul>
+
+                        </div>
+                        <hr>
+                    {% endfor %}
+
+                    {% for page in data.iter_pages() %}
+                        {% if page %}
+                            <a href="{{ url_for('read', page_num=page) }}">{{ page }}</a>
+                        {% else %}
+                            ...
+                        {% endif %}
+                    {% endfor %}
+            {% endif %}
+
+        {% endif %}
+        </div>
+</body>
+
+<script>
+
+function renderCreateInputs(){
+    html = `
+        <h1>Kreirajte novu nekretninu:</h1>
+        <div class="parameters">
+            <h2>Parametri:</h2>
+            <form action="{{url_for('create')}}" method="POST">
+                <label for="residence_type">Tip nekretnine:</label>
+                <select name="residence_type" id="residence_type">
+                  <option value="kuca" onclick="showLand()" selected>Kuća</option>
+                  <option value="stan" onclick="showLevels()">Stan</option>
+                </select>
+                <br>
+                <br>
+
+                <label for="transaction_type">Tip transakcije:</label>
+                <select name="transaction_type" id="transaction_type">
+                  <option value="prodaja" selected>Prodaja</option>
+                  <option value="izdavanje">Izdavanje</option>
+                </select>
+                <br>
+                <br>
+
+                <label for="location">Lokacija:</label>
+                <input type="text" id="location" name="location" required="required"/>
+                <br>
+                <br>
+
+                <label for="size">Kvadratura:</label>
+                <input type="number" id="size" name="size" required="required"/>
+                <br>
+                <br>
+
+                <label for="room_count">Broj soba:</label>
+                <input type="number" id="room_count" name="room_count" required="required"/>
+                <br>
+                <br>
+
+                <label for="parking">Parking:</label>
+                <select name="parking" id="parking">
+                  <option value=True selected>Da</option>
+                  <option value=False>Ne</option>
+                </select>
+                <br>
+                <br>
+
+                <label for="heating_type">Tip grejanja:</label>
+                <input type="text" id="heating_type" name="heating_type" required="required"/>
+                <br>
+                <br>
+
+                <label for="bathroom_count">Broj kupatila:</label>
+                <input type="number" id="bathroom_count" name="bathroom_count"/>
+                <br>
+                <br>
+
+                <label for="building_year">Godina izgradnje:</label>
+                <input type="number" id="building_year" name="building_year"/>
+                <br>
+                <br>
+
+                <label for="registered">Uknjiženost:</label>
+                <select name="registered" id="registered">
+                  <option value=True selected>Da</option>
+                  <option value=False>Ne</option>
+                </select>
+                <br>
+                <br>
+
+                <div id="land_or_levels">
+                    <label for="land">Veličina zemljišta:</label>
+                    <input type="number" id="land" name="land"/>
+                    <br>
+                    <br>
+                </div>
+                <br>
+                <br>
+
+                <label for="additional_info">Dodatne informacije:</label>
+                <textarea name="additional_info" id="additional_info" maxlength="255">
+                </textarea>
+                <br>
+                <br>
+
+                <button type="submit" id="submit_btn" name="submit_btn">Dodaj</button>
+            </form>
+        </div>`
+    document.getElementById("action").innerHTML = html;
+    document.getElementById("results").hidden = true;
+}
+
+function renderSearchInputs(){
+    html = `
+        <h1>Pretraživač nekretnina</h1>
+        <div class="filters">
+            <h2>Filteri: </h2>
+            <form action="{{url_for('read', page_num=1)}}" method="POST">
+                <h3>Tip nekretnine: </h3>
+                <input type="radio" id="radio_house" name="house" value="kuca" checked>
+                <label for="radio_house">Kuća</label>
+                <input type="radio" id="radio_flat" name="house" value="stan">
+                <label for="radio_flat">Stan</label>
+                <br>
+
+                <h3>Dostupnost parkinga: </h3>
+                <input type="radio" id="radio_parking_yes" name="parking" value=True checked>
+                <label for="radio_parking_yes">Da</label>
+                <input type="radio" id="radio_parking_no" name="parking" value=False>
+                <label for="radio_parking_no">Ne</label>
+                <br>
+
+                <h3>Kvadratura: </h3>
+                <label for="min_squares">Od: </label>
+                <input type="number" id="min_squares" name="min_squares" value="0">
+                <label for="max_squares">Do: </label>
+                <input type="number" id="max_squares" name="max_squares" value="100000">
+                <br>
+
+                <h3>Identifikator: </h3>
+                <label for="id_show">ID: </label>
+                <input type="number" id="id_show" name="id_show">
+                <br>
+                <br>
+                <button type="submit" id="submit_btn" name="submit_btn">Pretraži</button>
+            </form>
+        </div> `
+        document.getElementById("action").innerHTML = html;
+        document.getElementById("results").hidden = false;
+}
+
+function showLand(){
+    html = `
+            <label for="land">Veličina zemljišta:</label>
+            <input type="number" id="land" name="land"/>
+            <br>
+            <br> `
+    document.getElementById("land_or_levels").innerHTML = html;
+}
+
+function showLevels(){
+    html = `
+            <label for="level">Spratnost:</label>
+                    <div id="level">
+                        <input type="number" id="this_level" name="this_level"/>
+                        <span>/</span>
+                        <input type="number" id="all_levels" name="all_levels"/>
+                    </div> `
+    document.getElementById("land_or_levels").innerHTML = html;
+}
+
+</script>
+
+</html>
