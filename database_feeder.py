@@ -47,7 +47,6 @@ class Advert(db.Model):
 
 # Traversing through all JSON objects and creating an entry for database
 id_list = data.keys()
-print(id_list)
 for estate_id in id_list:
     str_id = str(estate_id)
     ad = data[str_id]

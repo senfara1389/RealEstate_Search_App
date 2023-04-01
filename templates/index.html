@@ -62,7 +62,7 @@
             {% if data is iterable and data is not string %}
                 {% for row in data.items %}
                         <div class='row'>
-                            <ul>
+                            <ul id="{{ row.advert_id }}">
                                 <li>ID: {{ row.advert_id }}</li>
                                 <li>Tip nekretnine: {{ row.residence_type }}</li>
                                 <li>Tip ponude: {{ row.transaction_type }}</li>
@@ -78,6 +78,8 @@
                                 <li>Godina gradnje: {{ row.building_year }}</li>
                                 <li>Dodatne informacije: <pre>{{ row.additional_info }}</pre> </li>
                             </ul>
+                            <br>
+                            <button class="btn_edit" onclick="openModal({{ row.advert_id }});">Izmeni podatke</button>
                         </div>
                         <hr>
                     {% endfor %}
@@ -92,6 +94,96 @@
             {% endif %}
         {% endif %}
         </div>
+    <dialog id="modal">
+        <h1>Ažurirajte sledeću nekretninu:</h1>
+        <div>
+            <form action="{{ url_for('update') }}" method="POST">
+                <input type="text" name="estate_id" id="estate_id" value="" readonly/>
+                <br>
+                <br>
+
+                <label for="residence_type">Tip nekretnine:</label>
+                <select name="residence_type" id="residence_type" value="None">
+                  <option value="kuća" onclick="showLand()">Kuća</option>
+                  <option value="stan" onclick="showLevels()">Stan</option>
+                </select>
+                <br>
+                <br>
+
+                <label for="transaction_type">Tip transakcije:</label>
+                <select name="transaction_type" id="transaction_type" value="None">
+                  <option value="prodaja">Prodaja</option>
+                  <option value="izdavanje">Izdavanje</option>
+                </select>
+                <br>
+                <br>
+
+                <label for="location">Lokacija:</label>
+                <input type="text" id="location" name="location"/>
+                <br>
+                <br>
+
+                <label for="size">Kvadratura:</label>
+                <input type="number" id="size" name="size" min="0" max="1389"/>
+                <br>
+                <br>
+
+                <label for="room_count">Broj soba:</label>
+                <input type="number" id="room_count" name="room_count"/>
+                <br>
+                <br>
+
+                <label for="parking">Parking:</label>
+                <select name="parking" id="parking" value="None">
+                  <option value=True>Da</option>
+                  <option value=False>Ne</option>
+                </select>
+                <br>
+                <br>
+
+                <label for="heating_type">Tip grejanja:</label>
+                <input type="text" id="heating_type" name="heating_type"/>
+                <br>
+                <br>
+
+                <label for="bathroom_count">Broj kupatila:</label>
+                <input type="number" id="bathroom_count" name="bathroom_count"/>
+                <br>
+                <br>
+
+                <label for="building_year">Godina izgradnje:</label>
+                <input type="number" id="building_year" name="building_year"/>
+                <br>
+                <br>
+
+                <label for="registered">Uknjiženost:</label>
+                <select name="registered" id="registered">
+                  <option value=True selected>Da</option>
+                  <option value=False>Ne</option>
+                </select>
+                <br>
+                <br>
+
+                <div id="land_or_levels">
+                    <label for="land">Veličina zemljišta:</label>
+                    <input type="number" id="land" name="land" step="0.1"/>
+                    <br>
+                    <br>
+                </div>
+                <br>
+                <br>
+
+                <label for="additional_info">Dodatne informacije:</label>
+                <textarea name="additional_info" id="additional_info" maxlength="255">
+                </textarea>
+                <br>
+                <br>
+
+                <button type="submit" id="submit_update_btn" name="submit_update_btn">Dodaj</button>
+                <button type="button" id="cancel_update_btn" name="cancel_update_btn" onclick="closeModal();">Otkaži</button>
+            </form>
+        </div>
+    </dialog>
 </body>
 
 <script>
@@ -101,10 +193,10 @@ function renderCreateInputs(){
         <h1>Kreirajte novu nekretninu:</h1>
         <div class="parameters">
             <h2>Parametri:</h2>
-            <form action="{{url_for('create')}}" method="POST">
+            <form action="{{ url_for('create') }}" method="POST">
                 <label for="residence_type">Tip nekretnine:</label>
                 <select name="residence_type" id="residence_type">
-                  <option value="kuca" onclick="showLand()" selected>Kuća</option>
+                  <option value="kuća" onclick="showLand()" selected>Kuća</option>
                   <option value="stan" onclick="showLevels()">Stan</option>
                 </select>
                 <br>
@@ -166,7 +258,7 @@ function renderCreateInputs(){
 
                 <div id="land_or_levels">
                     <label for="land">Veličina zemljišta:</label>
-                    <input type="number" id="land" name="land"/>
+                    <input type="number" id="land" name="land" step="0.1"/>
                     <br>
                     <br>
                 </div>
@@ -243,6 +335,18 @@ function showLevels(){
                         <input type="number" id="all_levels" name="all_levels"/>
                     </div> `
     document.getElementById("land_or_levels").innerHTML = html;
+}
+
+function openModal(id){
+    modal = document.getElementById("modal");
+    modal.showModal();
+
+    estate_id = document.getElementById("estate_id");
+    estate_id.value = id;
+}
+
+function closeModal(){
+    modal.close();
 }
 
 </script>

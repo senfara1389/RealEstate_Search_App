@@ -120,19 +120,28 @@ def create():
         parking = False
     heating_type = request.form['heating_type']
     bathroom_count = request.form['bathroom_count']
+    if bathroom_count == '':
+        bathroom_count = None
     building_year = request.form['building_year']
+    if building_year == '':
+        building_year = None
     registered = request.form['registered']
+    level = None
+    land = None
     if registered == "True":
-        registered = True
+        registered = 1
     elif registered == "False":
-        registered = False
-    if residence_type == "kuca":
+        registered = 0
+    if residence_type == "kuća":
         level = None
         land = request.form['land']
     elif residence_type == "stan":
         land = None
         level = str(request.form['this_level']) + " / " + str(request.form['all_levels'])
     additional_info = request.form['additional_info']
+    additional_info = additional_info.strip()
+    if additional_info == '':
+        additional_info = None
 
     a = Advert(residence_type, transaction_type, location, size, room_count, parking, heating_type, bathroom_count, land, level, building_year, registered, additional_info)
     db.session.add(a)
@@ -141,7 +150,7 @@ def create():
     try:
         db.session.commit()
     except Exception as e:
-        print("An error has occured: " + e)
+        print("An error has occured: " + str(e))
         db.rollback()
         db.flush()
         failed = True
@@ -151,6 +160,78 @@ def create():
 
     return redirect(url_for("index", message="Uspešno dodata nekretnina u bazu"))
 
+
+@app.route('/update', methods=['POST'])
+def update():
+    estate_id = request.form['estate_id']
+    entry = Advert.query.get(estate_id)
+
+    residence_type = request.form['residence_type']
+    if residence_type != "None":
+        entry.residence_type = residence_type
+
+    transaction_type = request.form['transaction_type']
+    if transaction_type != "None":
+        entry.transaction_type = transaction_type
+
+    location = request.form['location']
+    if location != "":
+        entry.location = location
+
+    size = request.form['size']
+    if size != "":
+        entry.size = size
+
+    room_count = request.form['room_count']
+    if room_count != "":
+        entry.room_count = room_count
+
+    parking = request.form['parking']
+    if parking != "None":
+        if parking == "True":
+            parking = True
+        elif parking == "False":
+            parking = False
+        entry.parking = parking
+
+    heating_type = request.form['heating_type']
+    if heating_type != "":
+        entry.heating_type = heating_type
+
+    bathroom_count = request.form['bathroom_count']
+    if bathroom_count != "":
+        entry.bathroom_count = bathroom_count
+
+    building_year = request.form['building_year']
+    if building_year != "":
+        entry.building_year = building_year
+
+    registered = request.form['registered']
+    if registered != "None":
+        if registered == "True":
+            registered = 1
+        elif registered == "False":
+            registered = 0
+        entry.registered = registered
+
+    if residence_type == "kuća":
+        land = request.form['land']
+        if land != "":
+            entry.land = land
+
+    elif residence_type == "stan":
+        this_level = request.form['this_level']
+        all_levels = request.form['all_levels']
+        if this_level != "" and all_levels != "":
+            entry.level = str(this_level) + " / " + str(all_levels)
+
+    additional_info = request.form['additional_info']
+    additional_info = additional_info.strip()
+    if additional_info != '':
+        entry.additional_info = additional_info
+
+    db.session.commit()
+    return redirect(url_for("index", message="Uspešno izmenjena nekretnina u bazi"))
 
 if __name__ == "__main__":
     app.run(debug=True)
