@@ -230,8 +230,19 @@ def update():
     if additional_info != '':
         entry.additional_info = additional_info
 
-    db.session.commit()
-    return redirect(url_for("index", message="Uspešno izmenjena nekretnina u bazi"))
+    failed = False
+    try:
+        db.session.commit()
+    except Exception as e:
+        print("An error has occured: " + str(e))
+        db.rollback()
+        db.flush()
+        failed = True
+
+    if failed is True:
+        return redirect(url_for("index", message="Došlo je do greške pri ažuriranju"))
+
+    return redirect(url_for("index", message="Uspešno ažurirana nekretnina u bazi"))
 
 if __name__ == "__main__":
     app.run(debug=True)
