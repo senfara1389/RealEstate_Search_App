@@ -1,11 +1,12 @@
 import json
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.app_context().push()
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:password@localhost:3306/realestate_database"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = '13€$'
 
 db = SQLAlchemy(app)
 
@@ -44,13 +45,64 @@ class Advert(db.Model):
 
 @app.route('/')
 def index():
-    data = None
-    return render_template("index.html", data=data)
+    message = request.args.get('message')
+    if message is None:
+        print("pocetak")
+    else:
+        print(message)
+    return render_template("index.html", data=None, message=message)
 
 
+@app.route('/read/', methods=['GET', 'POST'], defaults={'page_num': 1})
 @app.route('/read/<int:page_num>', methods=['GET', 'POST'])
 def read(page_num):
-    data = Advert.query.paginate(per_page=5, page=page_num)
+    new_search = request.args.get("option")
+    if new_search == "True" and request.form['id_show'] != "":
+        id_show = request.form['id_show']
+        data = Advert.query.filter(Advert.advert_id == id_show)
+        data = data.paginate(per_page=1, page=page_num)
+    else:
+        if new_search == "True":
+            if 'house' in session:
+                session.pop('house', None)
+            if 'parking' in session:
+                session.pop('parking', None)
+            if 'min_squares' in session:
+                session.pop('min_squares', None)
+            if 'max_squares' in session:
+                session.pop('max_squares', None)
+
+            if 'house' in request.form:
+                session['house'] = request.form['house']
+            if 'parking' in request.form:
+                session['parking'] = request.form['parking']
+                if session['parking'] == "True":
+                    session['parking'] = 1
+                elif session['parking'] == "False":
+                    session['parking'] = 0
+            session['min_squares'] = request.form['min_squares']
+            session['max_squares'] = request.form['max_squares']
+
+            if session['min_squares'] > session['max_squares']:
+                return render_template("index.html", data=None, message=
+                "Vrednost minimalne kvadrature mora biti manja od vrednosti maksimalne")
+
+        data = Advert.query
+
+        if 'house' in session and session['house'] != "":
+            data = data.filter(Advert.residence_type == session['house'])
+
+        if 'parking' in session and session['parking'] != "":
+            data = data.filter(Advert.parking == session['parking'])
+
+        if 'min_squares' in session and session['max_squares'] != "":
+            data = data.filter(Advert.size < session['max_squares'])
+
+        if 'max_squares' in session and session['min_squares'] != "":
+            data = data.filter(Advert.size > session['min_squares'])
+
+        data = data.paginate(per_page=5, page=page_num)
+
     return render_template("index.html", data=data)
 
 
@@ -84,9 +136,20 @@ def create():
 
     a = Advert(residence_type, transaction_type, location, size, room_count, parking, heating_type, bathroom_count, land, level, building_year, registered, additional_info)
     db.session.add(a)
-    db.session.commit()
 
-    return redirect(url_for("index", data="Uspešno dodata nekretnina u bazu"))
+    failed = False
+    try:
+        db.session.commit()
+    except Exception as e:
+        print("An error has occured: " + e)
+        db.rollback()
+        db.flush()
+        failed = True
+
+    if failed is True:
+        return redirect(url_for("index", message="Došlo je do greške pri upisu"))
+
+    return redirect(url_for("index", message="Uspešno dodata nekretnina u bazu"))
 
 
 if __name__ == "__main__":

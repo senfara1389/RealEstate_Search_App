@@ -61,10 +61,8 @@ def extract_details(ad_html, ad_url):
         detail = ad_html.find("h2", {"class": "detail-seo-subtitle"}).string
         if "stan" or "Garsonjera" in detail:
             new_obj["residence_type"] = "stan"
-        elif "kuća" in detail:
+        if "kuća" in detail:
             new_obj["residence_type"] = "kuća"
-        else:
-            return None
 
     #   Finding if the house is on lease or for sale
         if "Prodaja" in detail:
