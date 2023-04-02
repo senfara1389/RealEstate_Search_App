@@ -1,67 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow-x: hidden;">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <title>Flask App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
-<body>
-    <div id="option">
+<body style="overflow-x: hidden;">
+    <div id="option" class="text-center">
         <h3>Izaberite opciju: </h3>
             <input type="radio" id="search_database" name="option" onclick="renderSearchInputs()" checked>
-            <label for="search_database">Pretraži bazu</label>
+            <label class="label label-info" for="search_database">Pretraži bazu</label>
             <input type="radio" id="add_estate" name="option" onclick="renderCreateInputs()">
-            <label for="add_estate">Dodaj nekretninu</label>
+            <label for="add_estate"><span class="label label-info">Dodaj nekretninu</span></label>
             <br>
     </div>
     {% if message is not none %}
         {% if message is string %}
             <br>
-            <div class="message">
+            <div class="alert alert-success text-center">
                 <button type="button" class="closebtn" onclick="this.parentElement.style.display='none';">&times;</button>
                 {{ message }}
             </div>
         {% endif %}
     {% endif %}
     <div id="action">
-        <h1>Pretraživač nekretnina</h1>
-        <div class="filters">
-            <h2>Filteri: </h2>
-            <form action="{{ url_for('read', option=True) }}" method="POST">
-                <h3>Tip nekretnine: </h3>
-                <input type="radio" id="radio_house" name="house" value="kuća">
-                <label for="radio_house">Kuća</label>
-                <input type="radio" id="radio_flat" name="house" value="stan">
-                <label for="radio_flat">Stan</label>
-                <br>
+        <h1 class="jumbotron text-center">Pretraživač nekretnina</h1>
+        <div class="container">
+            <div class="row">
+                <form action="{{ url_for('read', option=True) }}" method="POST">
+                    <span class="border border-primary">
+                        <div class="col-sm-6">
+                                <h2>Filteri: </h2>
 
-                <h3>Dostupnost parkinga: </h3>
-                <input type="radio" id="radio_parking_yes" name="parking" value=True>
-                <label for="radio_parking_yes">Da</label>
-                <input type="radio" id="radio_parking_no" name="parking" value=False>
-                <label for="radio_parking_no">Ne</label>
+                                <h3>Tip nekretnine: </h3>
+                                <input type="radio" id="radio_house" name="house" value="kuća">
+                                <label for="radio_house">Kuća</label>
+                                <input type="radio" id="radio_flat" name="house" value="stan">
+                                <label for="radio_flat">Stan</label>
+                                <br>
+            
+                                <h3>Dostupnost parkinga: </h3>
+                                <input type="radio" id="radio_parking_yes" name="parking" value=True>
+                                <label for="radio_parking_yes">Da</label>
+                                <input type="radio" id="radio_parking_no" name="parking" value=False>
+                                <label for="radio_parking_no">Ne</label>
+                                <br>
+            
+                                <h3>Kvadratura: </h3>
+                                <label for="min_squares">Od: </label>
+                                <input type="number" id="min_squares" name="min_squares" min="0" max="1389">
+                                <label for="max_squares">Do: </label>
+                                <input type="number" id="max_squares" name="max_squares" min="0" max="1389">
+                                <br>
+                        </div>
+                    </span>
+                    <div class="col-sm-6">
+                        <h2>Pretraga po identifikatoru: </h2>
+                        <label for="id_show">ID: </label>
+                        <input type="number" id="id_show" name="id_show" min="0">
+                        <br>
+                        <br>
+                    </div>
+            </div>
+            <div class="row">
                 <br>
-
-                <h3>Kvadratura: </h3>
-                <label for="min_squares">Od: </label>
-                <input type="number" id="min_squares" name="min_squares" min="0">
-                <label for="max_squares">Do: </label>
-                <input type="number" id="max_squares" name="max_squares" max="1389">
                 <br>
-
-                <h2>Pretraga po identifikatoru: </h2>
-                <label for="id_show">ID: </label>
-                <input type="number" id="id_show" name="id_show">
-                <br>
-                <br>
-                <button type="submit" id="submit_btn" name="submit_btn">Pretraži</button>
-            </form>
+                <button type="submit" id="submit_btn" name="submit_btn" class="btn btn-info btn-block">Pretraži</button>
+                <hr>
+                </form>
+            </div> 
         </div>
     </div>
-    <div id="results">
+    <div id="results"> 
         {% if data is not none %}
             {% if data is iterable and data is not string %}
                 {% for row in data.items %}
-                        <div class='row'>
+                        <div class='item_row'>
                             <ul id="{{ row.advert_id }}">
                                 <li>ID: {{ row.advert_id }}</li>
                                 <li>Tip nekretnine: {{ row.residence_type }}</li>
@@ -76,21 +93,25 @@
                                 <li>Spratnost: {{ row.level }}</li>
                                 <li>Uknjiženost: {{ row.registered }}</li>
                                 <li>Godina gradnje: {{ row.building_year }}</li>
-                                <li>Dodatne informacije: <pre>{{ row.additional_info }}</pre> </li>
-                            </ul>
-                            <br>
-                            <button class="btn_edit" onclick="openModal({{ row.advert_id }});">Izmeni podatke</button>
+                                <li>Dodatne informacije: <pre>{{ row.additional_info }}</pre></li>
+                                <button class="btn-warning" onclick="openModal( {{ row.advert_id }} );">Izmeni podatke</button>
+                            </ul>  
                         </div>
                         <hr>
                     {% endfor %}
 
-                    {% for page in data.iter_pages() %}
-                        {% if page %}
-                            <a href="{{ url_for('read', page_num=page, option=False) }}">{{ page }}</a>
-                        {% else %}
-                            ...
-                        {% endif %}
-                    {% endfor %}
+                    <div class="text-center">
+                        <ul class="pagination">
+                            {% for page in data.iter_pages() %}
+                                {% if page %}
+                                    <li><a href="{{ url_for('read', page_num=page, option=False) }}">{{ page }}</a></li>
+                                {% else %}
+                                    <li><a class="disabled">...</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            </ul>
+                    </div>
+                    
             {% endif %}
         {% endif %}
         </div>
@@ -179,8 +200,8 @@
                 <br>
                 <br>
 
-                <button type="submit" id="submit_update_btn" name="submit_update_btn">Dodaj</button>
-                <button type="button" id="cancel_update_btn" name="cancel_update_btn" onclick="closeModal();">Otkaži</button>
+                <button class="btn-success" type="submit" id="submit_update_btn" name="submit_update_btn">Dodaj</button>
+                <button class="btn-danger" type="button" id="cancel_update_btn" name="cancel_update_btn" onclick="closeModal();">Otkaži</button>
             </form>
         </div>
     </dialog>
@@ -190,8 +211,8 @@
 
 function renderCreateInputs(){
     html = `
-        <h1>Kreirajte novu nekretninu:</h1>
-        <div class="parameters">
+        <h1 class="jumbotron text-center">Kreirajte novu nekretninu:</h1>
+        <div class="text-center">
             <h2>Parametri:</h2>
             <form action="{{ url_for('create') }}" method="POST">
                 <label for="residence_type">Tip nekretnine:</label>
@@ -271,7 +292,7 @@ function renderCreateInputs(){
                 <br>
                 <br>
 
-                <button type="submit" id="submit_btn" name="submit_btn">Dodaj</button>
+                <button type="submit" id="submit_btn" name="submit_btn" class="btn btn-info btn-block">Dodaj</button>
             </form>
         </div>`
     document.getElementById("action").innerHTML = html;
@@ -280,38 +301,51 @@ function renderCreateInputs(){
 
 function renderSearchInputs(){
     html = `
-        <h1>Pretraživač nekretnina</h1>
-        <div class="filters">
-            <h2>Filteri: </h2>
-            <form action="{{ url_for('read', option=True) }}" method="POST">
-                <h3>Tip nekretnine: </h3>
-                <input type="radio" id="radio_house" name="house" value="kuća" checked>
-                <label for="radio_house">Kuća</label>
-                <input type="radio" id="radio_flat" name="house" value="stan">
-                <label for="radio_flat">Stan</label>
-                <br>
+    <h1 class="jumbotron text-center">Pretraživač nekretnina</h1>
+        <div class="container">
+            <div class="row">
+                <form action="{{ url_for('read', option=True) }}" method="POST">
+                    <span class="border border-primary">
+                        <div class="col-sm-6">
+                                <h2>Filteri: </h2>
 
-                <h3>Dostupnost parkinga: </h3>
-                <input type="radio" id="radio_parking_yes" name="parking" value=True checked>
-                <label for="radio_parking_yes">Da</label>
-                <input type="radio" id="radio_parking_no" name="parking" value=False>
-                <label for="radio_parking_no">Ne</label>
+                                <h3>Tip nekretnine: </h3>
+                                <input type="radio" id="radio_house" name="house" value="kuća">
+                                <label for="radio_house">Kuća</label>
+                                <input type="radio" id="radio_flat" name="house" value="stan">
+                                <label for="radio_flat">Stan</label>
+                                <br>
+            
+                                <h3>Dostupnost parkinga: </h3>
+                                <input type="radio" id="radio_parking_yes" name="parking" value=True>
+                                <label for="radio_parking_yes">Da</label>
+                                <input type="radio" id="radio_parking_no" name="parking" value=False>
+                                <label for="radio_parking_no">Ne</label>
+                                <br>
+            
+                                <h3>Kvadratura: </h3>
+                                <label for="min_squares">Od: </label>
+                                <input type="number" id="min_squares" name="min_squares" min="0" max="1389">
+                                <label for="max_squares">Do: </label>
+                                <input type="number" id="max_squares" name="max_squares" min="0" max="1389">
+                                <br>  
+                        </div>
+                    </span>
+                    <div class="col-sm-6">
+                        <h2>Pretraga po identifikatoru: </h2>
+                        <label for="id_show">ID: </label>
+                        <input type="number" id="id_show" name="id_show" min="0">
+                        <br>
+                        <br>
+                    </div>
+            </div>
+            <div class="row">
                 <br>
-
-                <h3>Kvadratura: </h3>
-                <label for="min_squares">Od: </label>
-                <input type="number" id="min_squares" name="min_squares" value="0">
-                <label for="max_squares">Do: </label>
-                <input type="number" id="max_squares" name="max_squares" value="100000">
                 <br>
-
-                <h2>Pretraga po identifikatoru: </h2>
-                <label for="id_show">ID: </label>
-                <input type="number" id="id_show" name="id_show">
-                <br>
-                <br>
-                <button type="submit" id="submit_btn" name="submit_btn">Pretraži</button>
-            </form>
+                <button type="submit" id="submit_btn" name="submit_btn" class="btn btn-info btn-block">Pretraži</button>
+                <hr>
+                </form>
+            </div>
         </div> `
         document.getElementById("action").innerHTML = html;
         document.getElementById("results").hidden = false;

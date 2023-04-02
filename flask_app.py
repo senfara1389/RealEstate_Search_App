@@ -102,6 +102,30 @@ def read(page_num):
             data = data.filter(Advert.size > session['min_squares'])
 
         data = data.paginate(per_page=5, page=page_num)
+        for entry in data.items:
+            if entry.parking is True:
+                entry.parking = "Da"
+            elif entry.parking is False:
+                entry.parking = "Ne"
+
+            if entry.registered is True:
+                entry.registered = "Da"
+            elif entry.registered is False:
+                entry.registered = "Ne"
+            else:
+                entry.registered = "Nepoznato"
+
+            if entry.bathroom_count is None:
+                entry.bathroom_count = "/"
+
+            if entry.building_year is None:
+                entry.building_year = "/"
+
+            if entry.land is None:
+                entry.land = "/"
+
+            if entry.levels is None:
+                entry.levels = "/"
 
     return render_template("index.html", data=data)
 
@@ -230,19 +254,8 @@ def update():
     if additional_info != '':
         entry.additional_info = additional_info
 
-    failed = False
-    try:
-        db.session.commit()
-    except Exception as e:
-        print("An error has occured: " + str(e))
-        db.rollback()
-        db.flush()
-        failed = True
-
-    if failed is True:
-        return redirect(url_for("index", message="Došlo je do greške pri ažuriranju"))
-
-    return redirect(url_for("index", message="Uspešno ažurirana nekretnina u bazi"))
+    db.session.commit()
+    return redirect(url_for("index", message="Uspešno izmenjena nekretnina u bazi"))
 
 if __name__ == "__main__":
     app.run(debug=True)
