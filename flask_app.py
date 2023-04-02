@@ -124,8 +124,8 @@ def read(page_num):
             if entry.land is None:
                 entry.land = "/"
 
-            if entry.levels is None:
-                entry.levels = "/"
+            if entry.level is None:
+                entry.level = "/"
 
     return render_template("index.html", data=data)
 
